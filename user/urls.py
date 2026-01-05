@@ -1,11 +1,27 @@
 from django.urls import path
 
-from user.views import RegisterView, LoginView, MeView
 
-app_name = "user"
+from user.views import (
+    CreateUserView,
+    CreateTokenView,
+    ManageUserView
+)
 
 urlpatterns = [
-    path("register/", RegisterView.as_view(), name="create"),
-    path("login/", LoginView.as_view(), name="login"),
-    path("me/", MeView.as_view(), name="manage"),
+    path(
+        "register/",
+        CreateUserView.as_view(),
+        name="create"),
+    path(
+        "login/",
+        CreateTokenView.as_view(),
+        name="login"
+    ),
+    path(
+        "me/",
+        ManageUserView.as_view(),
+        name="manage"
+    ),
 ]
+
+app_name = "user"
