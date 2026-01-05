@@ -5,6 +5,7 @@ from django.db.models import F, Count
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from cinema.models import Genre, Actor, CinemaHall, Movie, MovieSession, Order
@@ -63,16 +64,10 @@ class MovieViewSet(viewsets.ModelViewSet):
 
         if title:
             queryset = queryset.filter(title__icontains=title)
-
         if genres:
-            queryset = queryset.filter(
-                genres__id__in=self._params_to_ints(genres)
-            )
-
+            queryset = queryset.filter(genres__id__in=self._params_to_ints(genres))
         if actors:
-            queryset = queryset.filter(
-                actors__id__in=self._params_to_ints(actors)
-            )
+            queryset = queryset.filter(actors__id__in=self._params_to_ints(actors))
 
         return queryset.distinct()
 
@@ -82,6 +77,20 @@ class MovieViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return MovieDetailSerializer
         return MovieSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
+        serializer = self.get_serializer(
+            obj, data=request.data, partial=kwargs.pop("partial", False)
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 class MovieSessionViewSet(viewsets.ModelViewSet):
@@ -120,6 +129,20 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
             return MovieSessionDetailSerializer
         return MovieSessionSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
+        serializer = self.get_serializer(
+            obj, data=request.data, partial=kwargs.pop("partial", False)
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
 
 class OrderPagination(PageNumberPagination):
     page_size = 10
@@ -133,7 +156,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    permission_classes = (IsAuthenticated,)  # Для Order треба явно IsAuthenticated
 
     def get_queryset(self):
         user = self.request.user
@@ -151,14 +174,18 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
+        if obj.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def update(self, request, *args, **kwargs):
         obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
-        serializer = self.get_serializer(obj,
-                                         data=request.data,
-                                         partial=kwargs.pop("partial", False))
+        if obj.user != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        serializer = self.get_serializer(
+            obj, data=request.data, partial=kwargs.pop("partial", False)
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
