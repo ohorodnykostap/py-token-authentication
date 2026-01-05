@@ -1,12 +1,9 @@
 from datetime import datetime
 
-from django.shortcuts import get_object_or_404
 from django.db.models import F, Count
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 from cinema.models import Genre, Actor, CinemaHall, Movie, MovieSession, Order
 from cinema.permissions import IsAdminOrIfAuthenticatedReadOnly
@@ -30,6 +27,7 @@ class GenreViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    http_method_names = ["get", "post"]
 
 
 class ActorViewSet(viewsets.ModelViewSet):
@@ -37,6 +35,7 @@ class ActorViewSet(viewsets.ModelViewSet):
     serializer_class = ActorSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    http_method_names = ["get", "post"]
 
 
 class CinemaHallViewSet(viewsets.ModelViewSet):
@@ -44,6 +43,7 @@ class CinemaHallViewSet(viewsets.ModelViewSet):
     serializer_class = CinemaHallSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    http_method_names = ["get", "post"]
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -51,6 +51,7 @@ class MovieViewSet(viewsets.ModelViewSet):
     serializer_class = MovieSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    http_method_names = ["get", "post"]
 
     @staticmethod
     def _params_to_ints(qs):
@@ -66,12 +67,10 @@ class MovieViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(title__icontains=title)
         if genres:
             queryset = queryset.filter(
-                genres__id__in=self._params_to_ints(genres)
-            )
+                genres__id__in=self._params_to_ints(genres))
         if actors:
             queryset = queryset.filter(
-                actors__id__in=self._params_to_ints(actors)
-            )
+                actors__id__in=self._params_to_ints(actors))
 
         return queryset.distinct()
 
@@ -81,20 +80,6 @@ class MovieViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return MovieDetailSerializer
         return MovieSerializer
-
-    def destroy(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
-        obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def update(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
-        serializer = self.get_serializer(
-            obj, data=request.data, partial=kwargs.pop("partial", False)
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
 
 
 class MovieSessionViewSet(viewsets.ModelViewSet):
@@ -133,20 +118,6 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
             return MovieSessionDetailSerializer
         return MovieSessionSerializer
 
-    def destroy(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
-        obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def update(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
-        serializer = self.get_serializer(
-            obj, data=request.data, partial=kwargs.pop("partial", False)
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
-
 
 class OrderPagination(PageNumberPagination):
     page_size = 10
@@ -160,7 +131,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    http_method_names = ["get", "post"]
 
     def get_queryset(self):
         user = self.request.user
@@ -175,21 +147,3 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-    def destroy(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
-        if obj.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        obj.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def update(self, request, *args, **kwargs):
-        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
-        if obj.user != request.user:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(
-            obj, data=request.data, partial=kwargs.pop("partial", False)
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
