@@ -1,9 +1,11 @@
 from datetime import datetime
 
+from django.shortcuts import get_object_or_404
 from django.db.models import F, Count
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.response import Response
 
 from cinema.models import Genre, Actor, CinemaHall, Movie, MovieSession, Order
 from cinema.permissions import IsAdminOrIfAuthenticatedReadOnly
@@ -51,8 +53,7 @@ class MovieViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def _params_to_ints(qs):
-        """Converts a comma-separated string of IDs to a list of integers"""
-        return [int(str_id) for str_id in qs.split(",") if str_id.isdigit()]
+        return [int(x) for x in qs.split(",") if x.isdigit()]
 
     def get_queryset(self):
         queryset = self.queryset
@@ -62,20 +63,10 @@ class MovieViewSet(viewsets.ModelViewSet):
 
         if title:
             queryset = queryset.filter(title__icontains=title)
-
         if genres:
-            try:
-                genre_ids = self._params_to_ints(genres)
-                queryset = queryset.filter(genres__id__in=genre_ids)
-            except ValueError:
-                pass
-
+            queryset = queryset.filter(genres__id__in=self._params_to_ints(genres))
         if actors:
-            try:
-                actor_ids = self._params_to_ints(actors)
-                queryset = queryset.filter(actors__id__in=actor_ids)
-            except ValueError:
-                pass
+            queryset = queryset.filter(actors__id__in=self._params_to_ints(actors))
 
         return queryset.distinct()
 
@@ -112,10 +103,8 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(show_time__date=date)
             except ValueError:
                 pass
-
         if movie_id_str and movie_id_str.isdigit():
             queryset = queryset.filter(movie_id=int(movie_id_str))
-
         return queryset
 
     def get_serializer_class(self):
@@ -153,3 +142,15 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        obj = get_object_or_404(self.get_queryset(), pk=kwargs.get("pk"))
+        serializer = self.get_serializer(obj, data=request.data, partial=kwargs.pop("partial", False))
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
