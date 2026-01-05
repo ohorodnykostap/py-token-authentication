@@ -65,9 +65,13 @@ class MovieViewSet(viewsets.ModelViewSet):
         if title:
             queryset = queryset.filter(title__icontains=title)
         if genres:
-            queryset = queryset.filter(genres__id__in=self._params_to_ints(genres))
+            queryset = queryset.filter(
+                genres__id__in=self._params_to_ints(genres)
+            )
         if actors:
-            queryset = queryset.filter(actors__id__in=self._params_to_ints(actors))
+            queryset = queryset.filter(
+                actors__id__in=self._params_to_ints(actors)
+            )
 
         return queryset.distinct()
 
@@ -156,7 +160,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)  # Для Order треба явно IsAuthenticated
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
