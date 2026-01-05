@@ -28,7 +28,6 @@ class GenreViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
-    http_method_names = ["get", "post"]
 
 
 class ActorViewSet(viewsets.ModelViewSet):
@@ -36,7 +35,6 @@ class ActorViewSet(viewsets.ModelViewSet):
     serializer_class = ActorSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
-    http_method_names = ["get", "post"]
 
 
 class CinemaHallViewSet(viewsets.ModelViewSet):
@@ -44,7 +42,6 @@ class CinemaHallViewSet(viewsets.ModelViewSet):
     serializer_class = CinemaHallSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
-    http_method_names = ["get", "post"]
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -52,7 +49,6 @@ class MovieViewSet(viewsets.ModelViewSet):
     serializer_class = MovieSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
-    http_method_names = ["get", "post"]
 
     @staticmethod
     def _params_to_ints(qs):
@@ -133,7 +129,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     pagination_class = OrderPagination
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    http_method_names = ["get", "post"]
 
     def get_queryset(self):
         user = self.request.user
