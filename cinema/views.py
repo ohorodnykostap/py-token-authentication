@@ -31,16 +31,16 @@ class GenreViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def partial_update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class ActorViewSet(viewsets.ModelViewSet):
@@ -50,16 +50,16 @@ class ActorViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def partial_update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class CinemaHallViewSet(viewsets.ModelViewSet):
@@ -69,16 +69,16 @@ class CinemaHallViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def partial_update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -195,13 +195,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def partial_update(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def destroy(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_404_NOT_FOUND)
